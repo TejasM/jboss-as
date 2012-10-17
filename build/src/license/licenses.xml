@@ -967,7 +967,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-jaxrs</artifactId>
       <licenses>
@@ -982,7 +982,7 @@
           <distribution>repo</distribution>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.codehaus.jackson</groupId>
       <artifactId>jackson-mapper-asl</artifactId>
@@ -1437,7 +1437,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-clustering-ejb3-infinispan</artifactId>
       <licenses>
@@ -1447,7 +1447,7 @@
           <distribution>repo</distribution>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-clustering-impl</artifactId>
@@ -1700,7 +1700,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-ejb3</artifactId>
       <licenses>
@@ -1710,7 +1710,7 @@
           <distribution>repo</distribution>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-embedded</artifactId>
@@ -1755,7 +1755,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-jaxrs</artifactId>
       <licenses>
@@ -1765,7 +1765,7 @@
           <distribution>repo</distribution>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.as</groupId>
       <artifactId>jboss-as-jdr</artifactId>
@@ -2170,7 +2170,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.ejb3</groupId>
       <artifactId>jboss-ejb3-ext-api</artifactId>
       <licenses>
@@ -2179,7 +2179,7 @@
           <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.invocation</groupId>
       <artifactId>jboss-invocation</artifactId>
@@ -2687,7 +2687,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
       <licenses>
@@ -2697,7 +2697,7 @@
           <distribution>repo</distribution>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jettison-provider</artifactId>
@@ -3032,7 +3032,7 @@
         </license>
       </licenses>
     </dependency>
-    <dependency>
+    <!-- <dependency>
       <groupId>org.jboss.spec.javax.ws.rs</groupId>
       <artifactId>jboss-jaxrs-api_1.1_spec</artifactId>
       <licenses>
@@ -3041,7 +3041,7 @@
           <url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
         </license>
       </licenses>
-    </dependency>
+    </dependency> -->
     <dependency>
       <groupId>org.jboss.spec.javax.xml.bind</groupId>
       <artifactId>jboss-jaxb-api_2.2_spec</artifactId>

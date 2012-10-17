@@ -2,7 +2,7 @@
 <!--  See src/resources/configuration/ReadMe.txt for how the configuration assembly works -->
 <config>
    <subsystems>
-      <subsystem>configuration/subsystems/logging.xml</subsystem>
+      <!-- <subsystem>configuration/subsystems/logging.xml</subsystem>
       <subsystem>configuration/subsystems/configadmin.xml</subsystem>
       <subsystem>configuration/subsystems/datasources.xml</subsystem>
       <subsystem>configuration/subsystems/deployment-scanner.xml</subsystem>
@@ -12,9 +12,9 @@
       <subsystem>configuration/subsystems/jaxrs.xml</subsystem>
       <subsystem>configuration/subsystems/jca.xml</subsystem>
       <subsystem>configuration/subsystems/jdr.xml</subsystem>
-      <subsystem>configuration/subsystems/jmx.xml</subsystem>
+      <subsystem>configuration/subsystems/jmx.xml</subsystem> -->
       <subsystem>configuration/subsystems/jpa.xml</subsystem>
-      <subsystem>configuration/subsystems/jsf.xml</subsystem>
+      <!-- <subsystem>configuration/subsystems/jsf.xml</subsystem>
       <subsystem>configuration/subsystems/mail.xml</subsystem>
       <subsystem>configuration/subsystems/naming.xml</subsystem>
       <subsystem>configuration/subsystems/osgi.xml</subsystem>
@@ -27,6 +27,6 @@
       <subsystem>configuration/subsystems/transactions.xml</subsystem>
       <subsystem>configuration/subsystems/web.xml</subsystem>
       <subsystem>configuration/subsystems/webservices.xml</subsystem>
-      <subsystem>configuration/subsystems/weld.xml</subsystem>
+      <subsystem>configuration/subsystems/weld.xml</subsystem> -->
    </subsystems>
 </config>
