@@ -785,13 +785,6 @@
 
                 <dependency>
                     <groupId>org.jboss.as</groupId>
-                    <artifactId>jboss-as-cli</artifactId>
-                    <classifier>client</classifier>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-client-all</artifactId>
                     <scope>provided</scope>
                 </dependency>
@@ -941,11 +934,6 @@
                     <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-jsf</artifactId>
                 </dependency>
- 
-                <dependency>
-                    <groupId>org.jboss.as</groupId>
-                    <artifactId>jboss-as-jsf-injection</artifactId>
-                </dependency>
 
                 <dependency>
                     <groupId>org.jboss.as</groupId>
@@ -1009,11 +997,6 @@
 
                 <dependency>
                     <groupId>org.jboss.as</groupId>
-                    <artifactId>jboss-as-osgi-integration</artifactId>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-platform-mbean</artifactId>
                 </dependency>
 
@@ -1054,11 +1037,6 @@
                 
                 <dependency>
                     <groupId>org.jboss.as</groupId>
-                    <artifactId>jboss-as-system-jmx</artifactId>
-                </dependency>
-                
-                <dependency>
-                    <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-threads</artifactId>
                 </dependency>
 
@@ -1066,12 +1044,7 @@
                     <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-transactions</artifactId>
                 </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.as</groupId>
-                    <artifactId>jboss-as-version</artifactId>
-                </dependency>
-
+                
                 <dependency>
                     <groupId>org.jboss.as</groupId>
                     <artifactId>jboss-as-web</artifactId>
