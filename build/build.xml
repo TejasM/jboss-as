@@ -650,7 +650,7 @@
 
         <module-def name="org.apache.juddi.scout">
             <maven-resource group="org.apache.juddi.scout" artifact="scout"/>
-        </module-def>
+        </module-def>-->
 
         <module-def name="org.apache.xalan">
             <maven-resource group="xalan" artifact="serializer"/>
@@ -661,7 +661,7 @@
             <maven-resource group="xerces" artifact="xercesImpl"/>
         </module-def>
 
-        <module-def name="org.apache.xml-resolver">
+        <!--<module-def name="org.apache.xml-resolver">
             <maven-resource group="xml-resolver" artifact="xml-resolver"/>
         </module-def>
 
@@ -715,14 +715,14 @@
             <maven-resource group="org.hibernate" artifact="hibernate-validator"/>
         </module-def>
 
-        <!--<module-def name="org.hornetq">
+        <module-def name="org.hornetq">
             <maven-resource group="org.hornetq" artifact="hornetq-core"/>
             <maven-resource group="org.hornetq" artifact="hornetq-commons"/>
             <maven-resource group="org.hornetq" artifact="hornetq-journal"/>
             <maven-resource group="org.hornetq" artifact="hornetq-jms"/>
         </module-def>
 
-        <module-def name="org.hornetq.ra">
+    	<!--<module-def name="org.hornetq.ra">
             <maven-resource group="org.hornetq" artifact="hornetq-ra"/>
         </module-def>-->
 
@@ -762,13 +762,13 @@
 
         <module-def name="org.jboss.as.appclient">
             <maven-resource group="org.jboss.as" artifact="jboss-as-appclient"/>
-        </module-def>
+        </module-def>-->
 
         <module-def name="org.jboss.as.console">
             <maven-resource-with-classifier group="org.jboss.as" artifact="jboss-as-console" classifier="resources"/>
         </module-def>
 
-        <module-def name="org.jboss.as.cli">
+        <!--<module-def name="org.jboss.as.cli">
             <maven-resource group="org.jboss.as" artifact="jboss-as-cli"/>
         </module-def>-->
 
@@ -985,18 +985,18 @@
 
         <module-def name="org.jboss.as.webservices.server.jaxrpc-integration">-->
             <!-- this is a dependencies only module for JAXRPC functionalities provided by JBossWS Native stack -->
-    	<!--</module-def>
+    	<!--</module-def>-->
 
         <module-def name="org.jboss.as.weld">
             <maven-resource group="org.jboss.as" artifact="jboss-as-weld"/>
         </module-def>
-        <module-def name="org.jboss.as.xts">
+        <!--<module-def name="org.jboss.as.xts">
             <maven-resource group="org.jboss.as" artifact="jboss-as-xts"/>
-        </module-def>
+        </module-def>-->
 
         <module-def name="org.jboss.classfilewriter">
             <maven-resource group="org.jboss.classfilewriter" artifact="jboss-classfilewriter"/>
-        </module-def>-->
+        </module-def>
 
         <module-def name="org.jboss.ejb-client">
             <maven-resource group="org.jboss" artifact="jboss-ejb-client"/>
@@ -1016,11 +1016,11 @@
             <maven-resource group="org.jboss" artifact="jboss-transaction-spi"/>
         </module-def>
 
-        <!--<module-def name="org.jboss.iiop-client">
+        <module-def name="org.jboss.iiop-client">
             <maven-resource group="org.jboss" artifact="jboss-iiop-client"/>
         </module-def>
 
-        <module-def name="org.jboss.ironjacamar.api">
+    	<module-def name="org.jboss.ironjacamar.api">
             <maven-resource group="org.jboss.ironjacamar" artifact="ironjacamar-common-api"/>
             <maven-resource group="org.jboss.ironjacamar" artifact="ironjacamar-common-spi"/>
             <maven-resource group="org.jboss.ironjacamar" artifact="ironjacamar-core-api"/>
@@ -1037,7 +1037,7 @@
             <maven-resource group="org.jboss.ironjacamar" artifact="ironjacamar-jdbc"/>
         </module-def>
 
-        <module-def name="org.jboss.jaxbintros">
+    	<!--<module-def name="org.jboss.jaxbintros">
             <maven-resource group="jboss.jaxbintros" artifact="jboss-jaxb-intros"/>
         </module-def>-->
 
@@ -1148,11 +1148,11 @@
         	<maven-resource group="org.jboss.security" artifact="jboss-negotiation-spnego"/>
         </module-def>
 
-        <!--<module-def name="org.jboss.security.xacml">
+        <module-def name="org.jboss.security.xacml">
             <maven-resource group="org.jboss.security" artifact="jbossxacml"/>
         </module-def>
 
-        <module-def name="org.jboss.shrinkwrap.core">
+    	<!--<module-def name="org.jboss.shrinkwrap.core">
             <maven-resource group="org.jboss.shrinkwrap" artifact="shrinkwrap-api"/>
             <maven-resource group="org.jboss.shrinkwrap" artifact="shrinkwrap-spi"/>
             <maven-resource group="org.jboss.shrinkwrap" artifact="shrinkwrap-impl-base"/>
@@ -1245,11 +1245,11 @@
             <maven-resource group="org.jgroups" artifact="jgroups"/>
         </module-def>
 
-        <!--<module-def name="org.joda.time">
+        <module-def name="org.joda.time">
             <maven-resource group="joda-time" artifact="joda-time"/>
         </module-def>
 
-        <module-def name="org.kohsuke.rngom">
+    	<!--<module-def name="org.kohsuke.rngom">
             <maven-resource group="org.kohsuke.rngom" artifact="rngom"/>
         </module-def>-->
 
@@ -1290,11 +1290,11 @@
             <maven-resource group="org.slf4j" artifact="slf4j-api"/>
         </module-def>
 
-        <!--<module-def name="org.slf4j.impl">
+        <module-def name="org.slf4j.impl">
             <maven-resource group="org.jboss.slf4j" artifact="slf4j-jboss-logmanager"/>
         </module-def>
 
-        <module-def name="org.slf4j.ext">
+    	<!--<module-def name="org.slf4j.ext">
             <maven-resource group="org.slf4j" artifact="slf4j-ext"/>
         </module-def>
 
