@@ -1088,9 +1088,20 @@
 
         <module-def name="org.jboss.osgi.spi">
             <maven-resource group="org.jboss.osgi.spi" artifact="jbosgi-spi"/>
-        </module-def>
+        </module-def>-->
+    	
+    	<module-def name="org.jboss.snowdrop">
+    		<!--<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-deployers-parent"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-facade"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-module-spring-3"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-namespace"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-subsystem-as7"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-subsystem-as7-distribution"/>
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-vfs"/>-->
+    		<maven-resource group="org.jboss.snowdrop" artifact="snowdrop-subsystem-as7"/>
+    	</module-def>
 
-        <module-def name="org.jboss.osgi.vfs">
+        <!--<module-def name="org.jboss.osgi.vfs">
             <maven-resource group="org.jboss.osgi.vfs" artifact="jbosgi-vfs"/>
             <maven-resource group="org.jboss.osgi.vfs" artifact="jbosgi-vfs30"/>
         </module-def>-->

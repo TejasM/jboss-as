@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+   <config>
+      <extension-module>org.jboss.as.simple</extension-module>
+      <subsystem xmlns="urn:jboss:domain:snowdrop:1.0">
+      </subsystem>
+   </config>
