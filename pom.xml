@@ -226,7 +226,7 @@
         <version.org.jboss.spec.javax.xml.rpc.jboss-jaxrpc-api_1.1_spec>1.0.1.Final</version.org.jboss.spec.javax.xml.rpc.jboss-jaxrpc-api_1.1_spec>
         <version.org.jboss.spec.javax.xml.soap.jboss-saaj-api_1.3_spec>1.0.2.Final</version.org.jboss.spec.javax.xml.soap.jboss-saaj-api_1.3_spec>
         <version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>2.0.1.Final</version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec>
-        <version.snowdrop>2.0.4.Final-SNAPSHOT</version.snowdrop>
+        <version.org.jboss.snowdrop>2.0.4.Final</version.org.jboss.snowdrop>
         <version.org.jboss.staxmapper>1.1.0.Final</version.org.jboss.staxmapper>
         <version.org.jboss.stdio>1.0.1.GA</version.org.jboss.stdio>
         <version.org.jboss.threads>2.0.0.GA</version.org.jboss.threads>
@@ -5230,23 +5230,18 @@
                 <version>${version.org.jboss.spec.javax.xml.ws.jboss-jaxws-api_2.2_spec}</version>
             </dependency>
             
-            <dependency>
-            	<groupId>org.jboss.snowdrop</groupId>
-            	<artifactId>snowdrop-subsystem-as7</artifactId>
-            	<version>${version.snowdrop}</version>
-            </dependency>
-            
-            <dependency>
-            	<groupId>org.jboss.snowdrop</groupId>
-            	<artifactId>snowdrop-vfs</artifactId>
-            	<version>${version.snowdrop}</version>
-            </dependency>
-            
-            <dependency>
+           	<!-- <dependency>
             	<groupId>org.jboss.snowdrop</groupId>
             	<artifactId>snowdrop-deployers</artifactId>
-            	<version>${version.snowdrop}</version>
+            	<version>${version.org.jboss.snowdrop}</version>
             </dependency>
+            
+            <dependency>
+            	<groupId>org.jboss.snowdrop</groupId>
+            	<artifactId>snowdrop-module-spring-3.1</artifactId>
+            	<version>${version.org.jboss.snowdrop}</version>
+            	<type>pom</type>
+            </dependency> -->
 
             <dependency>
                 <groupId>org.jboss.stdio</groupId>
@@ -6308,7 +6303,6 @@
                 <module>naming</module>
                 <module>transactions</module>
                 <module>web</module>
-                <module>../snowdrop</module>
             </modules>
         </profile>
     </profiles>
