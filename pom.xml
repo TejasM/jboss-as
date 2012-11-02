@@ -6300,6 +6300,7 @@
                 <module>logging</module>
                 <module>core-model-test</module>
                 <module>model-test</module>
+                <module>messaging</module>
                 <module>naming</module>
                 <module>transactions</module>
                 <module>web</module>
