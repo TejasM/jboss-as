@@ -5,6 +5,7 @@
       <subsystem>configuration/subsystems/deployment-scanner.xml</subsystem>
       <subsystem>configuration/subsystems/ee.xml</subsystem>
       <subsystem>configuration/subsystems/jpa.xml</subsystem>
+      <subsystem>configuration/subsystems/messaging.xml</subsystem>
       <subsystem>configuration/subsystems/naming.xml</subsystem>
       <subsystem>configuration/subsystems/remoting.xml</subsystem>
       <subsystem supplement="standalone">configuration/subsystems/security.xml</subsystem>

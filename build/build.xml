@@ -358,9 +358,9 @@
             <maven-resource group="ch.qos.cal10n" artifact="cal10n-api"/>
         </module-def>
 
-        <!--<module-def name="com.github.relaxng">
+        <module-def name="com.github.relaxng">
             <maven-resource group="com.github.relaxng" artifact="relaxngDatatype" />
-        </module-def>-->
+        </module-def>
 
         <module-def name="com.google.guava">
             <maven-resource group="com.google.guava" artifact="guava" />
@@ -370,22 +370,22 @@
             <maven-resource group="com.h2database" artifact="h2"/>
         </module-def>
 
-        <!--<module-def name="com.sun.codemodel">
+        <module-def name="com.sun.codemodel">
             <maven-resource group="com.sun.codemodel" artifact="codemodel"/>
         </module-def>
 
-        <module-def name="com.sun.istack">
+    	<module-def name="com.sun.istack">
             <maven-resource group="com.sun.istack" artifact="istack-commons-runtime"/>
             <maven-resource group="com.sun.istack" artifact="istack-commons-tools"/>
         </module-def>
 
-        <module-def name="com.sun.jsf-impl">
+    	<!--<module-def name="com.sun.jsf-impl">
             <maven-resource group="com.sun.faces" artifact="jsf-impl"/>
         </module-def>
 
         <module-def name="com.sun.jsf-impl" slot="1.2">
             <maven-resource group="javax.faces" artifact="jsf-impl"/>
-        </module-def>
+        </module-def>-->
 
         <module-def name="com.sun.xml.bind">
             <maven-resource group="com.sun.xml.bind" artifact="jaxb-impl"/>
@@ -402,7 +402,7 @@
 
         <module-def name="com.sun.xsom">
             <maven-resource group="com.sun.xsom" artifact="xsom"/>
-        </module-def>-->
+        </module-def>
 
         <module-def name="org.dom4j">
             <maven-resource group="dom4j" artifact="dom4j" />
@@ -722,9 +722,9 @@
             <maven-resource group="org.hornetq" artifact="hornetq-jms"/>
         </module-def>
 
-    	<!--<module-def name="org.hornetq.ra">
+    	<module-def name="org.hornetq.ra">
             <maven-resource group="org.hornetq" artifact="hornetq-ra"/>
-        </module-def>-->
+        </module-def>
 
         <module-def name="org.infinispan">
             <maven-resource group="org.infinispan" artifact="infinispan-core"/>
@@ -750,11 +750,11 @@
             <maven-resource group="org.javassist" artifact="javassist"/>
         </module-def>
 
-    	<!--<module-def name="org.jaxen">
+    	<module-def name="org.jaxen">
             <maven-resource group="jaxen" artifact="jaxen"/>
         </module-def>
 
-        <module-def name="org.jdom">
+    	<!--<module-def name="org.jdom">
             <maven-resource group="org.jdom" artifact="jdom"/>
         </module-def>
 
@@ -917,13 +917,13 @@
 
         <module-def name="org.jboss.as.management-client-content">
             <maven-resource group="org.jboss.as" artifact="jboss-as-management-client-content"/>
-        </module-def>
+        </module-def>-->
 
         <module-def name="org.jboss.as.messaging">
             <maven-resource group="org.jboss.as" artifact="jboss-as-messaging"/>
         </module-def>
 
-        <module-def name="org.jboss.as.modcluster">
+        <!--<module-def name="org.jboss.as.modcluster">
             <maven-resource group="org.jboss.as" artifact="jboss-as-modcluster"/>
             <maven-resource group="org.jboss.mod_cluster" artifact="mod_cluster-container-spi"/>
             <maven-resource group="org.jboss.mod_cluster" artifact="mod_cluster-core"/>
@@ -1060,11 +1060,11 @@
         <!--
           starting with 3.4.x Netty has changed its groupId to io.netty.
         -->
-    	<!--<module-def name="org.jboss.netty">
+    	<module-def name="org.jboss.netty">
             <maven-resource group="io.netty" artifact="netty"/>
         </module-def>
 
-        <module-def name="org.jboss.osgi.deployment">
+        <!--<module-def name="org.jboss.osgi.deployment">
             <maven-resource group="org.jboss.osgi.deployment" artifact="jbosgi-deployment"/>
         </module-def>
 
@@ -1264,9 +1264,9 @@
             <maven-resource group="joda-time" artifact="joda-time"/>
         </module-def>
 
-    	<!--<module-def name="org.kohsuke.rngom">
+    	<module-def name="org.kohsuke.rngom">
             <maven-resource group="org.kohsuke.rngom" artifact="rngom"/>
-        </module-def>-->
+        </module-def>
 
         <module-def name="org.omg.api" />
 
