@@ -6302,6 +6302,9 @@
                 <module>model-test</module>
                 <module>messaging</module>
                 <module>naming</module>
+                <module>platform-mbean</module>
+                <module>remoting</module>
+                <module>security</module>
                 <module>transactions</module>
                 <module>web</module>
             </modules>
