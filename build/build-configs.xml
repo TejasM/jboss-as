@@ -60,10 +60,22 @@
            paramTemplateFile="configuration/standalone/template.xml" 
            paramSubsystemsFile="configuration/standalone/subsystems-full-ha.xml"
            paramOutputFile="${generated.configs.standalone}/standalone-full-ha.xml"/>
+	  <generate-server-config 
+    	   paramTemplateFile="configuration/standalone/template.xml" 
+    	   paramSubsystemsFile="configuration/standalone/subsystems-minimal.xml"
+    	   paramOutputFile="${generated.configs.standalone}/standalone-minimal.xml"/>
+      <generate-server-config 
+      	   paramTemplateFile="configuration/standalone/template.xml" 
+      	   paramSubsystemsFile="configuration/standalone/subsystems-minimal-ha.xml"
+      	   paramOutputFile="${generated.configs.standalone}/standalone-minimal-ha.xml"/>
       <generate-domain-config 
            paramTemplateFile="configuration/domain/template.xml" 
            paramSubsystemsFile="configuration/domain/subsystems.xml"
            paramOutputFile="${generated.configs.domain}/domain.xml"/>
+      <generate-domain-config 
+    	   paramTemplateFile="configuration/domain/template.xml" 
+    	   paramSubsystemsFile="configuration/domain/subsystems-minimal.xml"
+    	   paramOutputFile="${generated.configs.domain}/domain-minimal.xml"/>
 
       <!-- Example configs -->
       <generate-server-config 
