@@ -6290,21 +6290,25 @@
                 <module>build-config</module>
                 <module>clustering</module>
                 <module>connector</module>
+                <module>core-model-test</module>
                 <module>deployment-scanner</module>
+                <module>domain-http</module>
+                <module>domain-management</module>
                 <module>ee</module>
                 <module>ee-deployment</module>
                 <module>ejb3</module>
                 <module>host-controller</module>
                 <module>jacorb</module>
+                <module>jmx</module>
                 <module>jpa</module>
-                <module>logging</module>
-                <module>core-model-test</module>
+                <module>logging</module>                
                 <module>model-test</module>
                 <module>messaging</module>
                 <module>naming</module>
-                <module>platform-mbean</module>
                 <module>remoting</module>
                 <module>security</module>
+                <module>system-jmx</module>
+                <module>threads</module>
                 <module>transactions</module>
                 <module>web</module>
             </modules>

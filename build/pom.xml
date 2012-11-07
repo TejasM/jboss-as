@@ -143,6 +143,11 @@
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-jmx</artifactId>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.jboss.as</groupId>
+        	<artifactId>jboss-as-system-jmx</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.as</groupId>
@@ -2611,11 +2616,11 @@
                                         <!-- <group>
                                             <title>Module org.jboss.as.mail</title>
                                             <packages>org.jboss.as.mail.extension</packages>
-                                        </group>
+                                        </group>-->
                                         <group>
                                             <title>Module org.jboss.as.management-client-content</title>
                                             <packages>org.jboss.as.management.client.content</packages>
-                                        </group>-->
+                                        </group>
                                         <group>
                                             <title>Module org.jboss.as.messaging</title>
                                             <packages>org.jboss.as.messaging:org.jboss.as.messaging.deployment:org.jboss.as.messaging.jms:org.jboss.as.messaging.jms.bridge</packages>

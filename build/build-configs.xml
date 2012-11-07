@@ -48,18 +48,18 @@
            paramTemplateFile="configuration/standalone/template.xml" 
            paramSubsystemsFile="configuration/standalone/subsystems.xml"
            paramOutputFile="${generated.configs.standalone}/standalone.xml"/>
-      <generate-server-config 
+      <!--<generate-server-config 
            paramTemplateFile="configuration/standalone/template.xml" 
            paramSubsystemsFile="configuration/standalone/subsystems-full.xml"
-           paramOutputFile="${generated.configs.standalone}/standalone-full.xml"/>
+           paramOutputFile="${generated.configs.standalone}/standalone-full.xml"/>-->
       <generate-server-config 
            paramTemplateFile="configuration/standalone/template.xml" 
            paramSubsystemsFile="configuration/standalone/subsystems-ha.xml"
            paramOutputFile="${generated.configs.standalone}/standalone-ha.xml"/>
-      <generate-server-config 
+      <!--<generate-server-config 
            paramTemplateFile="configuration/standalone/template.xml" 
            paramSubsystemsFile="configuration/standalone/subsystems-full-ha.xml"
-           paramOutputFile="${generated.configs.standalone}/standalone-full-ha.xml"/>
+           paramOutputFile="${generated.configs.standalone}/standalone-full-ha.xml"/>-->
       <generate-domain-config 
            paramTemplateFile="configuration/domain/template.xml" 
            paramSubsystemsFile="configuration/domain/subsystems.xml"
