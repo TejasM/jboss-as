@@ -25,6 +25,7 @@
 package org.jboss.as.controller;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 
 import org.jboss.as.controller.descriptions.ResourceDescriptionResolver;
@@ -45,6 +46,7 @@ public class SimpleOperationDefinitionBuilder {
     protected AttributeDefinition[] parameters = new AttributeDefinition[0];
     protected ModelType replyType;
     protected ModelType replyValueType;
+    protected boolean replyAllowNull;
     protected DeprecationData deprecationData = null;
     protected AttributeDefinition[] replyParameters = new AttributeDefinition[0];
 
@@ -58,7 +60,21 @@ public class SimpleOperationDefinitionBuilder {
         if (attributeResolver == null) {
             attributeResolver = resolver;
         }
-        return new SimpleOperationDefinition(name, resolver, attributeResolver, entryType, flags, replyType, replyValueType, deprecationData, replyParameters, parameters);
+        return internalBuild(resolver, attributeResolver);
+    }
+
+    protected SimpleOperationDefinition internalBuild(ResourceDescriptionResolver resolver, ResourceDescriptionResolver attributeResolver) {
+        return new SimpleOperationDefinition(name, resolver, attributeResolver, entryType, flags, replyType, replyValueType, replyAllowNull, deprecationData, replyParameters, parameters);
+    }
+
+    protected static EnumSet<OperationEntry.Flag> getFlagsSet(OperationEntry.Flag... vararg) {
+        if (vararg == null || vararg.length == 0) {
+            return EnumSet.noneOf(OperationEntry.Flag.class);
+        } else {
+            EnumSet<OperationEntry.Flag> result = EnumSet.noneOf(OperationEntry.Flag.class);
+            Collections.addAll(result, vararg);
+            return result;
+        }
     }
 
     public SimpleOperationDefinitionBuilder setEntryType(OperationEntry.EntryType entryType) {
@@ -73,6 +89,11 @@ public class SimpleOperationDefinitionBuilder {
 
     public SimpleOperationDefinitionBuilder withFlags(EnumSet<OperationEntry.Flag> flags) {
         this.flags = flags;
+        return this;
+    }
+
+    public SimpleOperationDefinitionBuilder withFlags(OperationEntry.Flag... flags) {
+        this.flags = getFlagsSet(flags);
         return this;
     }
 
@@ -111,6 +132,11 @@ public class SimpleOperationDefinitionBuilder {
 
     public SimpleOperationDefinitionBuilder setReplyValueType(ModelType replyValueType) {
         this.replyValueType = replyValueType;
+        return this;
+    }
+
+    public SimpleOperationDefinitionBuilder allowReturnNull() {
+        this.replyAllowNull = true;
         return this;
     }
 

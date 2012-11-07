@@ -37,7 +37,7 @@ import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.as.test.integration.osgi.jaxws.bundle.Endpoint;
 import org.jboss.as.test.integration.osgi.jaxws.bundle.EndpointImpl;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -80,6 +80,7 @@ public class WebServiceClientTestCase {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(WebService.class, SOAPBinding.class, QName.class, Service.class);
+                builder.addImportPackages(ManagementClient.class);
                 return builder.openStream();
             }
         });

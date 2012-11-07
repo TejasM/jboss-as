@@ -40,8 +40,8 @@ import org.jboss.msc.service.ServiceActivator;
 import org.jboss.msc.service.ServiceContainer;
 import org.jboss.msc.service.ServiceController.State;
 import org.jboss.msc.service.ServiceName;
-import org.jboss.osgi.spi.ManifestBuilder;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.ManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -70,11 +70,11 @@ public class ModuleAccessesBundleServiceTestCase extends AbstractXServiceTestCas
     @ArquillianResource
     public Deployer deployer;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
     @Deployment
     public static JavaArchive createdeployment() {
@@ -85,7 +85,7 @@ public class ModuleAccessesBundleServiceTestCase extends AbstractXServiceTestCas
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(Logger.class, PackageAdmin.class, Module.class);
+                builder.addImportPackages(Logger.class, PackageAdmin.class, Module.class, ServiceContainer.class);
                 return builder.openStream();
             }
         });

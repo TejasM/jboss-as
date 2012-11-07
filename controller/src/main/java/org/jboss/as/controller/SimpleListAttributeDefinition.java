@@ -22,7 +22,6 @@
 
 package org.jboss.as.controller;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -32,7 +31,6 @@ import javax.xml.stream.XMLStreamWriter;
 import org.jboss.as.controller.client.helpers.MeasurementUnit;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.descriptions.ResourceDescriptionResolver;
-import org.jboss.as.controller.operations.validation.AllowedValuesValidator;
 import org.jboss.as.controller.operations.validation.MinMaxValidator;
 import org.jboss.as.controller.operations.validation.ParameterValidator;
 import org.jboss.as.controller.registry.AttributeAccess;
@@ -158,15 +156,7 @@ public class SimpleListAttributeDefinition extends ListAttributeDefinition {
                 }
             }
         }
-        if (validator instanceof AllowedValuesValidator) {
-            AllowedValuesValidator avv = (AllowedValuesValidator) validator;
-            List<ModelNode> allowed = avv.getAllowedValues();
-            if (allowed != null) {
-                for (ModelNode ok : allowed) {
-                    result.get(ModelDescriptionConstants.ALLOWED).add(ok);
-                }
-            }
-        }
+        addAllowedValuesToDescription(result, validator);
         return result;
     }
 
@@ -191,6 +181,7 @@ public class SimpleListAttributeDefinition extends ListAttributeDefinition {
          * Reintroduced since some legacy subsystems require this method, and they now get booted up
          * for transformers subsystem testing.
          */
+        @Deprecated
         public static Builder of(final String name, final SimpleAttributeDefinition valueType) {
             return new Builder(name, valueType);
         }
@@ -217,11 +208,21 @@ public class SimpleListAttributeDefinition extends ListAttributeDefinition {
 
         /*
         --------------------------
-        added for binary compatibility for running compatibilty tests
+        added for binary compatibility with older versions
          */
         @Override
         public Builder setAllowNull(boolean allowNull) {
             return super.setAllowNull(allowNull);
+        }
+
+        @Override
+        public Builder setMaxSize(final int maxSize) {
+            return super.setMaxSize(maxSize);
+        }
+
+        @Override
+        public Builder setMinSize(final int minSize) {
+            return super.setMinSize(minSize);
         }
     }
 }

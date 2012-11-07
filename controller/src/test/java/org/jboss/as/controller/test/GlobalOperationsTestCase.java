@@ -26,10 +26,10 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ATTRIBUTES_ONLY;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.CHILD_TYPE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.INCLUDE_RUNTIME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ATTRIBUTES_ONLY;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OPERATIONS;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OPERATION_NAME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
@@ -159,9 +159,7 @@ public class GlobalOperationsTestCase extends AbstractGlobalOperationsTestCase {
 
         operation = createOperation(READ_ATTRIBUTE_OPERATION, "profile", "profileC", "subsystem", "subsystem4");
         operation.get(NAME).set("name");
-        result = executeForResult(operation);
-        assertNotNull(result);
-        assertFalse(result.isDefined());
+        executeForFailure(operation);
 
         operation = createOperation(READ_ATTRIBUTE_OPERATION, "profile", "profileC", "subsystem", "subsystem5");
         operation.get(NAME).set("name");

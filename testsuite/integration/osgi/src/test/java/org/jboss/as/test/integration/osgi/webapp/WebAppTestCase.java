@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.servlet.Servlet;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -40,7 +39,7 @@ import org.jboss.as.test.integration.common.HttpRequest;
 import org.jboss.as.test.integration.osgi.api.Echo;
 import org.jboss.as.test.integration.osgi.deployment.bundle.DeferredFailActivator;
 import org.jboss.as.test.integration.osgi.webapp.bundle.SimpleServlet;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -48,13 +47,11 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -83,11 +80,11 @@ public class WebAppTestCase {
     @ArquillianResource
     ManagementClient managementClient;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
     @Deployment
     public static Archive<?> deployment() {
@@ -99,6 +96,7 @@ public class WebAppTestCase {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(jar.getName());
                 builder.addBundleManifestVersion(2);
+                builder.addImportPackages(PackageAdmin.class, ManagementClient.class);
                 return builder.openStream();
             }
         });
@@ -218,46 +216,6 @@ public class WebAppTestCase {
         Bundle bundle = context.installBundle(BUNDLE_C_WAB, input);
         try {
             Assert.assertEquals("INSTALLED", Bundle.INSTALLED, bundle.getState());
-            try {
-                performCall("/bundle-d/servlet?input=Hello");
-                Assert.fail("IOException expected");
-            } catch (IOException ex) {
-                // expected
-            }
-
-            bundle.start();
-            Assert.assertEquals("ACTIVE", Bundle.ACTIVE, bundle.getState());
-
-            String result = performCall("/bundle-c/servlet?input=Hello");
-            Assert.assertEquals("Simple Servlet called with input=Hello", result);
-            result = performCall("/bundle-c/message.txt");
-            Assert.assertEquals("Hello from Resource", result);
-        } finally {
-            bundle.uninstall();
-        }
-    }
-
-    @Test
-    @Ignore("[AS7-5653] Cannot restart webapp bundle after activation failure")
-    public void testDeferredBundleWithFailure() throws Exception {
-        InputStream input = deployer.getDeployment(BUNDLE_F_WAB);
-        Bundle bundle = context.installBundle(BUNDLE_F_WAB, input);
-        try {
-            Assert.assertEquals("INSTALLED", Bundle.INSTALLED, bundle.getState());
-            try {
-                performCall("/bundle-d/servlet?input=Hello");
-                Assert.fail("IOException expected");
-            } catch (IOException ex) {
-                // expected
-            }
-
-            try {
-                bundle.start();
-                Assert.fail("BundleException expected");
-            } catch (BundleException ex) {
-                // expected
-            }
-            Assert.assertEquals("RESOLVED", Bundle.RESOLVED, bundle.getState());
             try {
                 performCall("/bundle-d/servlet?input=Hello");
                 Assert.fail("IOException expected");

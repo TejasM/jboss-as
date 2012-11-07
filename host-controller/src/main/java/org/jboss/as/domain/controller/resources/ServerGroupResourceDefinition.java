@@ -31,10 +31,11 @@ import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.as.controller.operations.global.WriteAttributeHandlers;
+import org.jboss.as.controller.operations.validation.IntRangeValidator;
 import org.jboss.as.controller.operations.validation.StringLengthValidator;
 import org.jboss.as.controller.parsing.Attribute;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.as.domain.controller.descriptions.DomainRootDescription;
+import org.jboss.as.domain.controller.descriptions.DomainResolver;
 import org.jboss.as.domain.controller.operations.DomainServerLifecycleHandlers;
 import org.jboss.as.domain.controller.operations.ServerGroupAddHandler;
 import org.jboss.as.domain.controller.operations.ServerGroupRemoveHandler;
@@ -67,18 +68,22 @@ public class ServerGroupResourceDefinition extends SimpleResourceDefinition {
 
     public static final SimpleAttributeDefinition SOCKET_BINDING_PORT_OFFSET = SimpleAttributeDefinitionBuilder.create(ModelDescriptionConstants.SOCKET_BINDING_PORT_OFFSET, ModelType.INT, true)
             .setDefaultValue(new ModelNode(0))
-            .setXmlName(Attribute.PORT_OFFSET.getLocalName()).build();
+            .setXmlName(Attribute.PORT_OFFSET.getLocalName())
+            .setAllowExpression(true)
+            .setValidator(new IntRangeValidator(-65535, 65535, true, true))
+            .build();
 
     public static final SimpleAttributeDefinition MANAGEMENT_SUBSYSTEM_ENDPOINT = SimpleAttributeDefinitionBuilder.create(ModelDescriptionConstants.MANAGEMENT_SUBSYSTEM_ENDPOINT, ModelType.BOOLEAN, true)
             .setDefaultValue(new ModelNode(false))
             .build();
+
     public static final AttributeDefinition[] ADD_ATTRIBUTES = new AttributeDefinition[] {PROFILE, SOCKET_BINDING_GROUP, SOCKET_BINDING_PORT_OFFSET, MANAGEMENT_SUBSYSTEM_ENDPOINT};
 
     private final ContentRepository contentRepo;
     private final HostFileRepository fileRepository;
 
     public ServerGroupResourceDefinition(final ContentRepository contentRepo, final HostFileRepository fileRepository) {
-        super(PathElement.pathElement(SERVER_GROUP), DomainRootDescription.getResourceDescriptionResolver(SERVER_GROUP, false), ServerGroupAddHandler.INSTANCE, ServerGroupRemoveHandler.INSTANCE);
+        super(PathElement.pathElement(SERVER_GROUP), DomainResolver.getResolver(SERVER_GROUP, false), ServerGroupAddHandler.INSTANCE, ServerGroupRemoveHandler.INSTANCE);
         this.contentRepo = contentRepo;
         this.fileRepository = fileRepository;
     }

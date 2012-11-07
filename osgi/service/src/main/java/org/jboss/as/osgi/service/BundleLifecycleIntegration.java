@@ -23,14 +23,12 @@ package org.jboss.as.osgi.service;
 
 import static org.jboss.as.osgi.OSGiLogger.LOGGER;
 import static org.jboss.as.osgi.OSGiMessages.MESSAGES;
-import static org.jboss.as.osgi.deployment.DeferredPhaseProcessor.DEFERRED_PHASE;
 import static org.jboss.as.server.Services.JBOSS_SERVER_CONTROLLER;
-import static org.jboss.as.server.deployment.Services.deploymentUnitName;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -42,6 +40,7 @@ import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentManager
 import org.jboss.as.osgi.management.OperationAssociation;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentUnit;
+import org.jboss.as.server.deployment.DeploymentUtils;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.server.deployment.client.ModelControllerServerDeploymentManager;
 import org.jboss.msc.service.ServiceBuilder;
@@ -51,18 +50,19 @@ import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceController.State;
 import org.jboss.msc.service.ServiceListener.Inheritance;
 import org.jboss.msc.service.ServiceName;
-import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.jboss.osgi.deployment.deployer.Deployment;
-import org.jboss.osgi.framework.BundleLifecyclePlugin;
 import org.jboss.osgi.framework.BundleManager;
-import org.jboss.osgi.framework.FutureServiceValue;
-import org.jboss.osgi.framework.IntegrationService;
 import org.jboss.osgi.framework.Services;
-import org.jboss.osgi.framework.util.ServiceTracker;
+import org.jboss.osgi.framework.spi.AbstractIntegrationService;
+import org.jboss.osgi.framework.spi.BundleLifecyclePlugin;
+import org.jboss.osgi.framework.spi.FutureServiceValue;
+import org.jboss.osgi.framework.spi.IntegrationService;
+import org.jboss.osgi.framework.spi.IntegrationServices;
+import org.jboss.osgi.framework.spi.ServiceTracker;
 import org.jboss.osgi.resolver.XBundle;
 import org.jboss.vfs.VFSUtils;
 import org.osgi.framework.BundleException;
@@ -73,7 +73,7 @@ import org.osgi.framework.BundleException;
  * @author thomas.diesler@jboss.com
  * @since 24-Nov-2010
  */
-public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, IntegrationService<BundleLifecyclePlugin> {
+public final class BundleLifecycleIntegration extends AbstractIntegrationService<BundleLifecyclePlugin> implements BundleLifecyclePlugin {
 
     private static Map<String, Deployment> deploymentMap = new HashMap<String, Deployment>();
 
@@ -81,19 +81,16 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
     private final InjectedValue<BundleManager> injectedBundleManager = new InjectedValue<BundleManager>();
     private ServerDeploymentManager deploymentManager;
 
-    @Override
-    public ServiceName getServiceName() {
-        return BUNDLE_LIFECYCLE_PLUGIN;
+    BundleLifecycleIntegration() {
+        super(IntegrationServices.BUNDLE_LIFECYCLE_PLUGIN);
     }
 
     @Override
-    public ServiceController<BundleLifecyclePlugin> install(ServiceTarget serviceTarget) {
-        ServiceBuilder<BundleLifecyclePlugin> builder = serviceTarget.addService(getServiceName(), this);
+    protected void addServiceDependencies(ServiceBuilder<BundleLifecyclePlugin> builder) {
         builder.addDependency(JBOSS_SERVER_CONTROLLER, ModelController.class, injectedController);
         builder.addDependency(Services.BUNDLE_MANAGER, BundleManager.class, injectedBundleManager);
         builder.addDependency(Services.FRAMEWORK_CREATE);
         builder.setInitialMode(Mode.ON_DEMAND);
-        return builder.install();
     }
 
     @Override
@@ -139,7 +136,7 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
         if (OperationAssociation.INSTANCE.getAssociation() != null) {
             LOGGER.warnCannotDeployBundleFromManagementOperation(dep);
             BundleManager bundleManager = injectedBundleManager.getValue();
-            bundleManager.installBundle(dep, null);
+            bundleManager.installBundle(dep, bundleManager.getServiceTarget(), null);
         } else {
             LOGGER.debugf("Install deployment: %s", dep);
             String runtimeName = getRuntimeName(dep);
@@ -172,7 +169,8 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
         }
 
         // There is no deferred phase, activate using the default
-        if (!depUnit.hasAttachment(Attachments.DEFERRED_MODULE_PHASE)) {
+        List<String> deferredModules = DeploymentUtils.getDeferredModules(depUnit);
+        if (!deferredModules.contains(depUnit.getName())) {
             handler.start(bundle, options);
             return;
         }
@@ -208,8 +206,7 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
 
         LOGGER.infoActivateDeferredModulePhase(bundle);
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        ServiceTracker<Object> serviceTracker = new ServiceTracker<Object>(true) {
+        ServiceTracker<Object> serviceTracker = new ServiceTracker<Object>("DeferredActivation") {
             private final AtomicInteger count = new AtomicInteger();
 
             @Override
@@ -230,7 +227,6 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
             @Override
             protected void complete() {
                 LOGGER.debugf("Complete: [%d]", count.get());
-                latch.countDown();
             }
         };
         phaseService.addListener(Inheritance.ALL, serviceTracker);
@@ -239,7 +235,7 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
         phaseService.setMode(Mode.ACTIVE);
 
         try {
-            latch.await();
+            serviceTracker.awaitCompletion();
         } catch (InterruptedException ex) {
             // ignore
         }
@@ -297,9 +293,7 @@ public final class BundleLifecycleIntegration implements BundleLifecyclePlugin, 
 
     @SuppressWarnings("unchecked")
     private ServiceController<Phase> getDeferredPhaseService(DeploymentUnit depUnit) {
-        String name = depUnit.getName();
-        DeploymentUnit parent = depUnit.getParent();
-        ServiceName serviceName = parent == null ? deploymentUnitName(name, DEFERRED_PHASE) : deploymentUnitName(parent.getName(), name, DEFERRED_PHASE);
+        ServiceName serviceName = DeploymentUtils.getDeploymentUnitPhaseServiceName(depUnit, Phase.FIRST_MODULE_USE);
         BundleManager bundleManager = injectedBundleManager.getValue();
         ServiceContainer serviceContainer = bundleManager.getServiceContainer();
         return (ServiceController<Phase>) serviceContainer.getRequiredService(serviceName);

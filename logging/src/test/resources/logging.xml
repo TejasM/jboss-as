@@ -32,27 +32,21 @@
 
     <console-handler name="CONSOLE">
         <level name="INFO"/>
-        <filter>
-            <level-range min-level="TRACE" max-level="WARN"/>
-        </filter>
+        <filter-spec value="levelRange(TRACE,WARN)" />
         <formatter>
             <pattern-formatter pattern="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n"/>
         </formatter>
     </console-handler>
 
     <file-handler name="anotherFile">
-        <filter>
-            <level-range min-level="TRACE" max-level="WARN" max-inclusive="false"/>
-        </filter>
+        <filter-spec value="levelRange(TRACE,WARN]" />
         <file relative-to="jboss.server.log.dir" path="another.log"/>
         <append value="true"/>
     </file-handler>
 
     <file-handler name="simpleFile">
         <level name="INFO"/>
-        <filter>
-            <deny/>
-        </filter>
+        <filter-spec value="deny"/>
         <file relative-to="jboss.server.log.dir" path="fileHandler.log"/>
         <append value="true"/>
     </file-handler>
@@ -76,14 +70,7 @@
 
     <periodic-rotating-file-handler name="FILE">
         <encoding value="UTF-8"/>
-        <filter>
-            <any>
-                <level name="INFO"/>
-                <not>
-                    <level name="TRACE"/>
-                </not>
-            </any>
-        </filter>
+        <filter-spec value="any(levels(INFO),not(levels(TRACE)))"/>
         <formatter>
             <pattern-formatter pattern="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n"/>
         </formatter>
@@ -94,12 +81,7 @@
     <size-rotating-file-handler name="sizeLogger">
         <level name="DEBUG"/>
         <encoding value="UTF-8"/>
-        <filter>
-            <all>
-                <change-level new-level="DEBUG"/>
-                <match pattern=".*"/>
-            </all>
-        </filter>
+        <filter-spec value="all(levelChange(DEBUG),match(&quot;JBAS+\\d&quot;))"/>
         <formatter>
             <pattern-formatter pattern="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n"/>
         </formatter>
@@ -111,9 +93,7 @@
 
     <logger category="com.example" use-parent-handlers="false">
         <level name="TRACE"/>
-        <filter>
-            <level-range min-level="TRACE" max-level="WARN" min-inclusive="true"/>
-        </filter>
+        <filter-spec value="levelRange[TRACE,WARN)"/>
         <handlers>
             <handler name="sizeLogger"/>
             <handler name="CONSOLE"/>
@@ -122,9 +102,7 @@
 
     <logger category="com.arjuna">
         <level name="WARN"/>
-        <filter>
-            <level-range min-level="TRACE" max-level="WARN" min-inclusive="true"/>
-        </filter>
+        <filter-spec value="levelRange[TRACE,WARN]"/>
     </logger>
 
     <root-logger>
@@ -140,9 +118,7 @@
 
             <console-handler name="CONSOLE">
                 <level name="ALL"/>
-                <filter>
-                    <level-range min-level="TRACE" max-level="WARN"/>
-                </filter>
+                <filter-spec value="levelRange(TRACE,WARN)"/>
                 <formatter>
                     <pattern-formatter pattern="%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n"/>
                 </formatter>
@@ -150,9 +126,7 @@
 
             <logger category="org.jboss.as.logging">
                 <level name="TRACE"/>
-                <filter>
-                    <level-range min-level="TRACE" max-level="ERROR" min-inclusive="true"/>
-                </filter>
+                <filter-spec value="levelRange[TRACE,WARN)"/>
             </logger>
 
             <root-logger>

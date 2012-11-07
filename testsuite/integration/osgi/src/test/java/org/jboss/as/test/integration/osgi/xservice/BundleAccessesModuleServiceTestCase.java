@@ -40,10 +40,11 @@ import org.jboss.logging.Logger;
 import org.jboss.modules.Module;
 import org.jboss.msc.service.ServiceActivator;
 import org.jboss.msc.service.ServiceContainer;
+import org.jboss.msc.service.ServiceController.State;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.osgi.framework.Services;
-import org.jboss.osgi.spi.ManifestBuilder;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.ManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -72,8 +73,8 @@ public class BundleAccessesModuleServiceTestCase extends AbstractXServiceTestCas
     @ArquillianResource
     public Deployer deployer;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
     @Deployment
     public static JavaArchive createdeployment() {
@@ -84,7 +85,7 @@ public class BundleAccessesModuleServiceTestCase extends AbstractXServiceTestCas
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(Logger.class, Services.class, Module.class);
+                builder.addImportPackages(Logger.class, Services.class, Module.class, ServiceContainer.class);
                 return builder.openStream();
             }
         });
@@ -98,7 +99,7 @@ public class BundleAccessesModuleServiceTestCase extends AbstractXServiceTestCas
         try {
             // Check that the target service is up
             ServiceName targetService = ServiceName.parse("jboss.osgi.example.target.service");
-            //assertServiceState(serviceContainer, targetService, State.UP, 5000);
+            assertServiceState(serviceContainer, targetService, State.UP, 5000);
 
             // Install the client bundle
             InputStream input = deployer.getDeployment(CLIENT_BUNDLE_NAME);

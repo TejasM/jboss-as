@@ -21,7 +21,10 @@
 */
 package org.jboss.as.server.controller.resources;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.CORE_SERVICE;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SERVER;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SERVICE_CONTAINER;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBDEPLOYMENT;
 
 import java.util.EnumSet;
 
@@ -38,10 +41,12 @@ import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.SimpleMapAttributeDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.controller.descriptions.common.ControllerResolver;
+import org.jboss.as.controller.descriptions.common.CoreManagementDefinition;
 import org.jboss.as.controller.extension.ExtensionRegistry;
+import org.jboss.as.controller.extension.ExtensionResourceDefinition;
 import org.jboss.as.controller.operations.common.NamespaceAddHandler;
 import org.jboss.as.controller.operations.common.NamespaceRemoveHandler;
-import org.jboss.as.controller.operations.common.ProcessReloadHandler;
 import org.jboss.as.controller.operations.common.ProcessStateAttributeHandler;
 import org.jboss.as.controller.operations.common.ResolveExpressionHandler;
 import org.jboss.as.controller.operations.common.SchemaLocationAddHandler;
@@ -49,6 +54,7 @@ import org.jboss.as.controller.operations.common.SchemaLocationRemoveHandler;
 import org.jboss.as.controller.operations.common.SnapshotDeleteHandler;
 import org.jboss.as.controller.operations.common.SnapshotListHandler;
 import org.jboss.as.controller.operations.common.SnapshotTakeHandler;
+import org.jboss.as.controller.operations.common.SocketBindingGroupRemoveHandler;
 import org.jboss.as.controller.operations.common.ValidateAddressOperationHandler;
 import org.jboss.as.controller.operations.common.ValidateOperationHandler;
 import org.jboss.as.controller.operations.common.XmlMarshallingHandler;
@@ -60,12 +66,17 @@ import org.jboss.as.controller.operations.validation.ParameterValidator;
 import org.jboss.as.controller.operations.validation.StringLengthValidator;
 import org.jboss.as.controller.persistence.ExtensibleConfigurationPersister;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.as.controller.registry.OperationEntry;
-import org.jboss.as.controller.registry.OperationEntry.EntryType;
 import org.jboss.as.controller.registry.OperationEntry.Flag;
+import org.jboss.as.controller.resource.InterfaceDefinition;
+import org.jboss.as.controller.resource.SocketBindingGroupResourceDefinition;
 import org.jboss.as.controller.services.path.PathManagerService;
+import org.jboss.as.controller.services.path.PathResourceDefinition;
+import org.jboss.as.domain.management.connections.ldap.LdapConnectionResourceDefinition;
+import org.jboss.as.domain.management.security.SecurityRealmResourceDefinition;
 import org.jboss.as.domain.management.security.WhoAmIOperation;
+import org.jboss.as.platform.mbean.PlatformMBeanResourceRegistrar;
 import org.jboss.as.repository.ContentRepository;
+import org.jboss.as.server.DeployerChainAddHandler;
 import org.jboss.as.server.ServerEnvironment;
 import org.jboss.as.server.ServerEnvironment.LaunchType;
 import org.jboss.as.server.ServerEnvironmentResourceDescription;
@@ -77,6 +88,12 @@ import org.jboss.as.server.deployment.DeploymentReplaceHandler;
 import org.jboss.as.server.deployment.DeploymentUploadBytesHandler;
 import org.jboss.as.server.deployment.DeploymentUploadStreamAttachmentHandler;
 import org.jboss.as.server.deployment.DeploymentUploadURLHandler;
+import org.jboss.as.server.deploymentoverlay.DeploymentOverlayDefinition;
+import org.jboss.as.server.deploymentoverlay.service.DeploymentOverlayPriority;
+import org.jboss.as.server.mgmt.HttpManagementResourceDefinition;
+import org.jboss.as.server.mgmt.NativeManagementResourceDefinition;
+import org.jboss.as.server.mgmt.NativeRemotingManagementResourceDefinition;
+import org.jboss.as.server.operations.DumpServicesHandler;
 import org.jboss.as.server.operations.LaunchTypeHandler;
 import org.jboss.as.server.operations.ProcessTypeHandler;
 import org.jboss.as.server.operations.RootResourceHack;
@@ -88,6 +105,13 @@ import org.jboss.as.server.operations.ServerVersionOperations.DefaultEmptyListAt
 import org.jboss.as.server.operations.ServerVersionOperations.ManagementVersionAttributeHandler;
 import org.jboss.as.server.operations.ServerVersionOperations.ProductInfoAttributeHandler;
 import org.jboss.as.server.operations.ServerVersionOperations.ReleaseVersionAttributeHandler;
+import org.jboss.as.server.services.net.BindingGroupAddHandler;
+import org.jboss.as.server.services.net.LocalDestinationOutboundSocketBindingResourceDefinition;
+import org.jboss.as.server.services.net.NetworkInterfaceRuntimeHandler;
+import org.jboss.as.server.services.net.RemoteDestinationOutboundSocketBindingResourceDefinition;
+import org.jboss.as.server.services.net.SocketBindingResourceDefinition;
+import org.jboss.as.server.services.net.SpecifiedInterfaceAddHandler;
+import org.jboss.as.server.services.net.SpecifiedInterfaceRemoveHandler;
 import org.jboss.as.server.services.net.SpecifiedInterfaceResolveHandler;
 import org.jboss.as.server.services.security.AbstractVaultReader;
 import org.jboss.dmr.ModelType;
@@ -154,7 +178,7 @@ public class ServerRootResourceDefinition extends SimpleResourceDefinition {
 
     private static final EnumSet<Flag> runtimeOnlyFlag = EnumSet.of(Flag.RUNTIME_ONLY);
     public static final AttributeDefinition RUNNING_MODE = SimpleAttributeDefinitionBuilder.create(ModelDescriptionConstants.RUNNING_MODE, ModelType.STRING)
-            .setValidator(new EnumValidator(RunningMode.class, false, false))
+            .setValidator(new EnumValidator<RunningMode>(RunningMode.class, false, false))
             .setStorageRuntime()
             .build();
 
@@ -204,15 +228,14 @@ public class ServerRootResourceDefinition extends SimpleResourceDefinition {
         }
 
         // Other root resource operations
-        resourceRegistration.registerOperationHandler(CompositeOperationHandler.NAME, CompositeOperationHandler.INSTANCE, CompositeOperationHandler.INSTANCE, false, EntryType.PRIVATE);
+        resourceRegistration.registerOperationHandler(CompositeOperationHandler.DEFINITION, CompositeOperationHandler.INSTANCE, false);
         XmlMarshallingHandler xmh = new XmlMarshallingHandler(extensibleConfigurationPersister);
         resourceRegistration.registerOperationHandler(XmlMarshallingHandler.DEFINITION, xmh);
         resourceRegistration.registerOperationHandler(NamespaceAddHandler.DEFINITION, NamespaceAddHandler.INSTANCE);
         resourceRegistration.registerOperationHandler(NamespaceRemoveHandler.DEFINITION, NamespaceRemoveHandler.INSTANCE);
         resourceRegistration.registerOperationHandler(SchemaLocationAddHandler.DEFINITION, SchemaLocationAddHandler.INSTANCE);
         resourceRegistration.registerOperationHandler(SchemaLocationRemoveHandler.DEFINITION, SchemaLocationRemoveHandler.INSTANCE);
-        resourceRegistration.registerOperationHandler(ValidateAddressOperationHandler.OPERATION_NAME, ValidateAddressOperationHandler.INSTANCE,
-                ValidateAddressOperationHandler.INSTANCE, false, EnumSet.of(OperationEntry.Flag.READ_ONLY));
+        resourceRegistration.registerOperationHandler(ValidateAddressOperationHandler.DEFINITION, ValidateAddressOperationHandler.INSTANCE, false);
 
         DeploymentUploadBytesHandler.register(resourceRegistration, contentRepository);
         DeploymentUploadURLHandler.register(resourceRegistration, contentRepository);
@@ -231,22 +254,20 @@ public class ServerRootResourceDefinition extends SimpleResourceDefinition {
 
         resourceRegistration.registerOperationHandler(ServerRestartRequiredHandler.DEFINITION, ServerRestartRequiredHandler.INSTANCE);
 
-        resourceRegistration.registerOperationHandler(ResolveExpressionHandler.OPERATION_NAME, ResolveExpressionHandler.INSTANCE,
-                ResolveExpressionHandler.INSTANCE, EnumSet.of(OperationEntry.Flag.READ_ONLY, OperationEntry.Flag.RUNTIME_ONLY));
+        resourceRegistration.registerOperationHandler(ResolveExpressionHandler.DEFINITION, ResolveExpressionHandler.INSTANCE, false);
 
         resourceRegistration.registerOperationHandler(SpecifiedInterfaceResolveHandler.DEFINITION, SpecifiedInterfaceResolveHandler.INSTANCE);
         resourceRegistration.registerOperationHandler(WhoAmIOperation.DEFINITION, WhoAmIOperation.INSTANCE, true);
 
         //Hack to be able to access the registry for the jmx facade
-        resourceRegistration.registerOperationHandler(RootResourceHack.NAME, RootResourceHack.INSTANCE, RootResourceHack.INSTANCE, false, OperationEntry.EntryType.PRIVATE, runtimeOnlyFlag);
+        resourceRegistration.registerOperationHandler(RootResourceHack.DEFINITION, RootResourceHack.INSTANCE);
 
         // Runtime operations
         if (serverEnvironment != null) {
             // Reload op -- does not work on a domain mode server
             if (serverEnvironment.getLaunchType() != ServerEnvironment.LaunchType.DOMAIN) {
-                ServerProcessReloadHandler reloadHandler = new ServerProcessReloadHandler(Services.JBOSS_AS, runningModeControl,
-                        processState, ServerDescriptions.getResourceDescriptionResolver("server"));
-                resourceRegistration.registerOperationHandler(ProcessReloadHandler.OPERATION_NAME, reloadHandler, reloadHandler);
+                ServerProcessReloadHandler reloadHandler = new ServerProcessReloadHandler(Services.JBOSS_AS, runningModeControl, processState);
+                resourceRegistration.registerOperationHandler(ServerProcessReloadHandler.DEFINITION, reloadHandler, false);
             }
 
             // The System.exit() based shutdown command is only valid for a server process directly launched from the command line
@@ -291,6 +312,74 @@ public class ServerRootResourceDefinition extends SimpleResourceDefinition {
 
         resourceRegistration.registerReadOnlyAttribute(NAMESPACES, DefaultEmptyListAttributeHandler.INSTANCE);
         resourceRegistration.registerReadOnlyAttribute(SCHEMA_LOCATIONS, DefaultEmptyListAttributeHandler.INSTANCE);
+    }
+
+    @Override
+    public void registerChildren(ManagementResourceRegistration resourceRegistration) {
+
+        // System Properties
+        resourceRegistration.registerSubModel(SystemPropertyResourceDefinition.createForStandaloneServer(serverEnvironment));
+
+        //vault
+        resourceRegistration.registerSubModel(new VaultResourceDefinition(vaultReader));
+
+        // Central Management
+        // Start with the base /core-service=management MNR. The Resource for this is added by ServerService itself, so there is no add/remove op handlers
+        ManagementResourceRegistration management = resourceRegistration.registerSubModel(CoreManagementDefinition.INSTANCE);
+
+        management.registerSubModel(SecurityRealmResourceDefinition.INSTANCE);
+        management.registerSubModel(LdapConnectionResourceDefinition.INSTANCE);
+        management.registerSubModel(NativeManagementResourceDefinition.INSTANCE);
+        management.registerSubModel(NativeRemotingManagementResourceDefinition.INSTANCE);
+        management.registerSubModel(HttpManagementResourceDefinition.INSTANCE);
+
+        // Other core services
+        ManagementResourceRegistration serviceContainer = resourceRegistration.registerSubModel(
+                new SimpleResourceDefinition(PathElement.pathElement(CORE_SERVICE, SERVICE_CONTAINER), ControllerResolver.getResolver("core", SERVICE_CONTAINER)));
+        serviceContainer.registerOperationHandler(DumpServicesHandler.DEFINITION, DumpServicesHandler.INSTANCE);
+
+        // Platform MBeans
+        PlatformMBeanResourceRegistrar.registerPlatformMBeanResources(resourceRegistration);
+
+        // Paths
+        resourceRegistration.registerSubModel(PathResourceDefinition.createSpecified(pathManager));
+
+        // Interfaces
+        ManagementResourceRegistration interfaces = resourceRegistration.registerSubModel(new InterfaceDefinition(
+                SpecifiedInterfaceAddHandler.INSTANCE,
+                SpecifiedInterfaceRemoveHandler.INSTANCE,
+                true
+        ));
+        interfaces.registerReadOnlyAttribute(NetworkInterfaceRuntimeHandler.RESOLVED_ADDRESS, NetworkInterfaceRuntimeHandler.INSTANCE);
+        interfaces.registerOperationHandler(SpecifiedInterfaceResolveHandler.DEFINITION, SpecifiedInterfaceResolveHandler.INSTANCE);
+
+        //TODO socket-binding-group currently lives in controller and the child RDs live in server so they currently need passing in from here
+        resourceRegistration.registerSubModel(new SocketBindingGroupResourceDefinition(BindingGroupAddHandler.INSTANCE,
+                                        SocketBindingGroupRemoveHandler.INSTANCE,
+                                        false,
+                                        SocketBindingResourceDefinition.INSTANCE,
+                                        RemoteDestinationOutboundSocketBindingResourceDefinition.INSTANCE,
+                                        LocalDestinationOutboundSocketBindingResourceDefinition.INSTANCE));
+
+        // Deployments
+        ManagementResourceRegistration deployments = resourceRegistration.registerSubModel(ServerDeploymentResourceDescription.create(contentRepository, vaultReader));
+
+        //deployment overlays
+        resourceRegistration.registerSubModel(new DeploymentOverlayDefinition(DeploymentOverlayPriority.SERVER, contentRepository, null));
+
+        // The sub-deployments registry
+        deployments.registerSubModel(new SimpleResourceDefinition(PathElement.pathElement(SUBDEPLOYMENT), DeploymentAttributes.DEPLOYMENT_RESOLVER));
+
+        // Extensions
+        resourceRegistration.registerSubModel(new ExtensionResourceDefinition(extensionRegistry, parallelBoot, false));
+        if (extensionRegistry != null) {
+            //extension registry may be null during testing
+            extensionRegistry.setSubsystemParentResourceRegistrations(resourceRegistration, deployments);
+            extensionRegistry.setPathManager(pathManager);
+        }
+
+        // Util
+        resourceRegistration.registerOperationHandler(DeployerChainAddHandler.DEFINITION, DeployerChainAddHandler.INSTANCE, false);
     }
 
 

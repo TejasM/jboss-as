@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
 import org.jboss.as.test.integration.osgi.api.Echo;
 import org.junit.Assert;
 import org.osgi.framework.BundleContext;
@@ -37,8 +38,8 @@ import org.osgi.framework.BundleContext;
 public class BeansService implements Callable<Boolean> {
 
     private static final String JAVA_GLOBAL_NAMESPACE_PREFIX = "java:global/";
-    private static final String JAVA_APP_NAMESPACE_PREFIX = "java:app/";
-    private static final String JAVA_MODULE_NAMESPACE_PREFIX = "java:module/";
+    //private static final String JAVA_APP_NAMESPACE_PREFIX = "java:app/";
+    //private static final String JAVA_MODULE_NAMESPACE_PREFIX = "java:module/";
 
     private final BundleContext context;
 

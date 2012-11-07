@@ -19,8 +19,6 @@ package org.jboss.as.test.integration.osgi.deployment;
 import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -32,15 +30,14 @@ import org.jboss.as.test.osgi.FrameworkManagement;
 import org.jboss.as.test.osgi.FrameworkUtils;
 import org.jboss.dmr.ModelNode;
 import org.jboss.osgi.framework.BundleManager;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.osgi.resolver.XBundle;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
@@ -73,18 +70,14 @@ public class DeferredResolveTestCase {
     @ArquillianResource
     ManagementClient managementClient;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
-    @Inject
-    public StartLevel startLevel;
+    @ArquillianResource
+    StartLevel startLevel;
 
-    @Inject
-    public PackageAdmin packageAdmin;
-
-    enum Phase {
-        FIRST_MODULE_USE, INSTALL
-    }
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
     @Deployment
     public static Archive<?> getDeployment() {
@@ -96,7 +89,8 @@ public class DeferredResolveTestCase {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(ModelControllerClient.class, ModelNode.class);
+                builder.addImportPackages(ModelControllerClient.class, ModelNode.class, ManagementClient.class);
+                builder.addImportPackages(PackageAdmin.class, StartLevel.class);
                 builder.addImportPackages(XBundle.class, BundleManager.class);
                 return builder.openStream();
             }
@@ -266,18 +260,34 @@ public class DeferredResolveTestCase {
     }
 
     @Test
-    public void testAggregateWithOneDeferredModule() throws Exception {
+    public void testAggregateWithDeferredModule() throws Exception {
+        deployer.deploy(DEFERRED_AGGREGATE_A);
         try {
-            deployer.deploy(DEFERRED_AGGREGATE_A);
-            Assert.fail("RuntimeException expected");
-        } catch (RuntimeException e) {
-            // expected
+            Bundle bundleA = packageAdmin.getBundles(DEFERRED_BUNDLE_A, null)[0];
+            Assert.assertEquals("Bundle INSTALLED", Bundle.INSTALLED, bundleA.getState());
+            deployer.deploy(DEFERRED_BUNDLE_B);
+            try {
+                Bundle bundleB = packageAdmin.getBundles(DEFERRED_BUNDLE_B, null)[0];
+                Assert.assertEquals("Bundle INSTALLED", Bundle.INSTALLED, bundleA.getState());
+                Assert.assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundleB.getState());
+
+                packageAdmin.resolveBundles(new Bundle[] { bundleA });
+
+                Assert.assertEquals("Bundle RESOLVED", Bundle.RESOLVED, bundleA.getState());
+                Assert.assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundleB.getState());
+
+                bundleA.start();
+                Assert.assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundleA.getState());
+            } finally {
+                deployer.undeploy(DEFERRED_BUNDLE_B);
+            }
+        } finally {
+            deployer.undeploy(DEFERRED_AGGREGATE_A);
         }
     }
 
     @Test
-    @Ignore
-    public void testAggregateWithOneDeferredModuleAndOneGoodModule() throws Exception {
+    public void testAggregateWithUndeferredModule() throws Exception {
         deployer.deploy(DEFERRED_AGGREGATE_B);
         try {
             Bundle bundleA = packageAdmin.getBundles(DEFERRED_BUNDLE_A, null)[0];

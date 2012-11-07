@@ -22,10 +22,14 @@
 package org.jboss.as.jmx;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ADD;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ALLOWED;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.ATTRIBUTES;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.CHILDREN;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DEFAULT;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIPTION;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.EXPRESSIONS_ALLOWED;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.MAX;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.MIN;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
@@ -38,9 +42,11 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VAL
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,7 +110,6 @@ import org.jboss.as.remoting.management.ManagementRemotingServices;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.ControllerInitializer;
-import org.jboss.as.subsystem.test.KernelServices;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceName;
@@ -152,14 +157,10 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         MBeanServerConnection connection = setupAndGetConnection(new BaseAdditionalInitialization(TYPE_STANDALONE));
 
         int count = connection.getMBeanCount();
-        Set<ObjectInstance> instances = connection.queryMBeans(null, null);
-        Set<ObjectName> objectNames = connection.queryNames(null, null);
-        Assert.assertEquals(count, instances.size());
-        Assert.assertEquals(count, objectNames.size());
-        checkSameMBeans(instances, objectNames);
-        assertContainsNames(objectNames,
-                LEGACY_ROOT_NAME, LEGACY_INTERFACE_NAME, LEGACY_SOCKET_BINDING_GROUP_NAME, LEGACY_SERVER_SOCKET_BINDING_NAME, LEGACY_SUBSYSTEM_NAME,
-                EXPR_ROOT_NAME, EXPR_INTERFACE_NAME, EXPR_SOCKET_BINDING_GROUP_NAME, EXPR_SERVER_SOCKET_BINDING_NAME, EXPR_SUBSYSTEM_NAME);
+        checkQueryMBeans(connection, count, null);
+        checkQueryMBeans(connection, count, new ObjectName("*:*"));
+
+
 
         Set<ObjectInstance> filteredInstances = connection.queryMBeans(createObjectName(LEGACY_DOMAIN + ":socket-binding-group=*,*"),
                 null);
@@ -167,7 +168,7 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         Assert.assertEquals(2, filteredInstances.size());
         Assert.assertEquals(2, filteredNames.size());
         checkSameMBeans(filteredInstances, filteredNames);
-        assertContainsNames(objectNames, LEGACY_SOCKET_BINDING_GROUP_NAME, LEGACY_SERVER_SOCKET_BINDING_NAME);
+        assertContainsNames(filteredNames, LEGACY_SOCKET_BINDING_GROUP_NAME, LEGACY_SERVER_SOCKET_BINDING_NAME);
 
         filteredInstances = connection.queryMBeans(createObjectName(EXPR_DOMAIN + ":socket-binding-group=*,*"),
                 null);
@@ -175,8 +176,20 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         Assert.assertEquals(2, filteredInstances.size());
         Assert.assertEquals(2, filteredNames.size());
         checkSameMBeans(filteredInstances, filteredNames);
-        assertContainsNames(objectNames, EXPR_SOCKET_BINDING_GROUP_NAME, EXPR_SERVER_SOCKET_BINDING_NAME);
+        assertContainsNames(filteredNames, EXPR_SOCKET_BINDING_GROUP_NAME, EXPR_SERVER_SOCKET_BINDING_NAME);
         // TODO test with QueryExp
+    }
+
+    private void checkQueryMBeans(MBeanServerConnection connection, int count, ObjectName filter) throws Exception {
+        Set<ObjectInstance> instances = connection.queryMBeans(filter, null);
+        Set<ObjectName> objectNames = connection.queryNames(filter, null);
+        Assert.assertEquals(count, instances.size());
+        Assert.assertEquals(count, objectNames.size());
+
+        checkSameMBeans(instances, objectNames);
+        assertContainsNames(objectNames,
+                LEGACY_ROOT_NAME, LEGACY_INTERFACE_NAME, LEGACY_SOCKET_BINDING_GROUP_NAME, LEGACY_SERVER_SOCKET_BINDING_NAME, LEGACY_SUBSYSTEM_NAME,
+                EXPR_ROOT_NAME, EXPR_INTERFACE_NAME, EXPR_SOCKET_BINDING_GROUP_NAME, EXPR_SERVER_SOCKET_BINDING_NAME, EXPR_SUBSYSTEM_NAME);
     }
 
     @Test
@@ -249,17 +262,36 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         Assert.assertEquals(IntOperationWithParams.OPERATION_JMX_NAME, op.getName());
         Assert.assertEquals("Test2", op.getDescription());
         Assert.assertEquals(String.class.getName(), op.getReturnType());
-        Assert.assertEquals(3, op.getSignature().length);
+        Assert.assertEquals(5, op.getSignature().length);
+
         Assert.assertEquals("param1", op.getSignature()[0].getName());
         Assert.assertEquals("Param1", op.getSignature()[0].getDescription());
         Assert.assertEquals(Long.class.getName(), op.getSignature()[0].getType());
+
         Assert.assertEquals("param2", op.getSignature()[1].getName());
         Assert.assertEquals("Param2", op.getSignature()[1].getDescription());
         Assert.assertEquals(String[].class.getName(), op.getSignature()[1].getType());
+
         Assert.assertEquals("param3", op.getSignature()[2].getName());
         Assert.assertEquals("Param3", op.getSignature()[2].getDescription());
         Assert.assertEquals(TabularData.class.getName(), op.getSignature()[2].getType());
         assertMapType(assertCast(OpenMBeanParameterInfo.class, op.getSignature()[2]).getOpenType(), SimpleType.STRING, SimpleType.INTEGER);
+
+        Assert.assertEquals("param4", op.getSignature()[3].getName());
+        Assert.assertEquals("Param4", op.getSignature()[3].getDescription());
+        Assert.assertEquals(Integer.class.getName(), op.getSignature()[3].getType());
+        OpenMBeanParameterInfo parameterInfo = assertCast(OpenMBeanParameterInfo.class, op.getSignature()[3]);
+        Assert.assertEquals(6, parameterInfo.getDefaultValue());
+        Assert.assertEquals(5, parameterInfo.getMinValue());
+        Assert.assertEquals(10, parameterInfo.getMaxValue());
+
+        Assert.assertEquals("param5", op.getSignature()[4].getName());
+        Assert.assertEquals("Param5", op.getSignature()[4].getDescription());
+        Assert.assertEquals(Integer.class.getName(), op.getSignature()[4].getType());
+        parameterInfo = assertCast(OpenMBeanParameterInfo.class, op.getSignature()[4]);
+        Assert.assertNull(parameterInfo.getDefaultValue());
+        Assert.assertNull(parameterInfo.getDefaultValue());
+        Assert.assertEquals(new HashSet<Object>(Arrays.asList(3, 5, 7)), parameterInfo.getLegalValues());
 
         op = findOperation(operations, ComplexOperation.OPERATION_NAME);
         Assert.assertEquals(ComplexOperation.OPERATION_NAME, op.getName());
@@ -354,17 +386,37 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         Assert.assertEquals(IntOperationWithParams.OPERATION_JMX_NAME, op.getName());
         Assert.assertEquals("Test2", op.getDescription());
         Assert.assertEquals(String.class.getName(), op.getReturnType());
-        Assert.assertEquals(3, op.getSignature().length);
+        Assert.assertEquals(5, op.getSignature().length);
+
         Assert.assertEquals("param1", op.getSignature()[0].getName());
         Assert.assertEquals("Param1", op.getSignature()[0].getDescription());
         Assert.assertEquals(String.class.getName(), op.getSignature()[0].getType());
+
         Assert.assertEquals("param2", op.getSignature()[1].getName());
         Assert.assertEquals("Param2", op.getSignature()[1].getDescription());
         Assert.assertEquals(String[].class.getName(), op.getSignature()[1].getType());
+
         Assert.assertEquals("param3", op.getSignature()[2].getName());
         Assert.assertEquals("Param3", op.getSignature()[2].getDescription());
         Assert.assertEquals(TabularData.class.getName(), op.getSignature()[2].getType());
         assertMapType(assertCast(OpenMBeanParameterInfo.class, op.getSignature()[2]).getOpenType(), SimpleType.STRING, SimpleType.STRING);
+
+        Assert.assertEquals("param4", op.getSignature()[3].getName());
+        Assert.assertEquals("Param4", op.getSignature()[3].getDescription());
+        Assert.assertEquals(String.class.getName(), op.getSignature()[3].getType());
+        OpenMBeanParameterInfo parameterInfo = assertCast(OpenMBeanParameterInfo.class, op.getSignature()[3]);
+        Assert.assertNull(parameterInfo.getDefaultValue());
+        Assert.assertNull(parameterInfo.getMinValue());
+        Assert.assertNull(parameterInfo.getMaxValue());
+
+        Assert.assertEquals("param5", op.getSignature()[4].getName());
+        Assert.assertEquals("Param5", op.getSignature()[4].getDescription());
+        Assert.assertEquals(String.class.getName(), op.getSignature()[4].getType());
+        parameterInfo = assertCast(OpenMBeanParameterInfo.class, op.getSignature()[4]);
+        Assert.assertNull(parameterInfo.getDefaultValue());
+        Assert.assertNull(parameterInfo.getLegalValues());
+        Assert.assertNull(parameterInfo.getDefaultValue());
+        Assert.assertNull(parameterInfo.getLegalValues());
 
         op = findOperation(operations, ComplexOperation.OPERATION_NAME);
         Assert.assertEquals(ComplexOperation.OPERATION_NAME, op.getName());
@@ -792,8 +844,8 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         String result = assertCast(String.class, connection.invoke(
                 name,
                 IntOperationWithParams.OPERATION_JMX_NAME,
-                new Object[] {100L, new String[] {"A"}, Collections.singletonMap("test", 3)},
-                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName()}));
+                new Object[] {100L, new String[] {"A"}, Collections.singletonMap("test", 3), 5, 5},
+                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName(), Integer.class.getName(), Integer.class.getName()}));
         Assert.assertEquals("A105", result);
         Assert.assertTrue(IntOperationWithParams.INSTANCE_NO_EXPRESSIONS.invoked);
 
@@ -821,8 +873,8 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
             connection.invoke(
                 name,
                 IntOperationWithParams.OPERATION_JMX_NAME,
-                new Object[] {100L, new String[] {"A"}, Collections.singletonMap("test", 3)},
-                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName()});
+                new Object[] {100L, new String[] {"A"}, Collections.singletonMap("test", 3), 5, 5},
+                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName(), Integer.class.getName(), Integer.class.getName()});
             Assert.fail("Should not have been able to invoke method");
         } catch (Exception expected) {
         }
@@ -842,8 +894,8 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         String result = assertCast(String.class, connection.invoke(
                 name,
                 IntOperationWithParams.OPERATION_JMX_NAME,
-                new Object[] {"${should.not.exist!!!!!:100}", new String[] {"${should.not.exist!!!!!:A}"}, Collections.singletonMap("test", "${should.not.exist!!!!!:3}")},
-                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName()}));
+                new Object[] {"${should.not.exist!!!!!:100}", new String[] {"${should.not.exist!!!!!:A}"}, Collections.singletonMap("test", "${should.not.exist!!!!!:3}"), "${should.not.exist!!!!!:5}", "${should.not.exist!!!!!:5}"},
+                new String[] {Long.class.getName(), String[].class.getName(), Map.class.getName(), Integer.class.getName(), Integer.class.getName()}));
         Assert.assertEquals("A105", result);
         Assert.assertTrue(IntOperationWithParams.INSTANCE_EXPRESSIONS.invoked);
 
@@ -1044,24 +1096,10 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         return null;
     }
 
-    private void assertEqualByteArray(byte[] bytes, int...expected) {
-        Assert.assertEquals(expected.length, bytes.length);
-        for (int i = 0 ; i < bytes.length ; i++) {
-            Assert.assertEquals(expected[i], bytes[i]);
-        }
-    }
-
     private void assertEqualByteArray(byte[] bytes, byte...expected) {
         Assert.assertEquals(expected.length, bytes.length);
         for (int i = 0 ; i < bytes.length ; i++) {
             Assert.assertEquals(expected[i], bytes[i]);
-        }
-    }
-
-    private void assertEqualList(List<?> list, Object...expected) {
-        Assert.assertEquals(expected.length, list.size());
-        for (int i = 0 ; i < list.size() ; i++) {
-            Assert.assertEquals(expected[i], list.get(i));
         }
     }
 
@@ -1164,7 +1202,7 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
                 + "<expose-expression-model/>"
                 + "<remoting-connector/>" + "</subsystem>"
                 + additionalInitialization.getExtraXml();
-        KernelServices services = super.installInController(additionalInitialization, subsystemXml);
+        createKernelServicesBuilder(additionalInitialization).setSubsystemXml(subsystemXml).build();
 
         // Make sure that we can connect to the MBean server
         String host = "localhost";
@@ -1211,7 +1249,7 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
         protected void initializeExtraSubystemsAndModel(ExtensionRegistry extensionRegistry, Resource rootResource,
                 ManagementResourceRegistration rootRegistration) {
             rootResource.getModel().get(LAUNCH_TYPE).set(launchType);
-            rootRegistration.registerOperationHandler(ResolveExpressionHandler.OPERATION_NAME, ResolveExpressionHandler.INSTANCE, ResolveExpressionHandler.INSTANCE);
+            rootRegistration.registerOperationHandler(ResolveExpressionHandler.DEFINITION, ResolveExpressionHandler.INSTANCE);
         }
 
         @Override
@@ -1473,6 +1511,18 @@ public class ModelControllerMBeanTestCase extends AbstractSubsystemTest {
                 node.get(REQUEST_PROPERTIES, "param3", VALUE_TYPE).set(ModelType.INT);
                 node.get(REQUEST_PROPERTIES, "param3", DESCRIPTION).set("Param3");
                 node.get(REQUEST_PROPERTIES, "param3", EXPRESSIONS_ALLOWED).set(allowExpressions);
+                node.get(REQUEST_PROPERTIES, "param4", TYPE).set(ModelType.INT);
+                node.get(REQUEST_PROPERTIES, "param4", DESCRIPTION).set("Param4");
+                node.get(REQUEST_PROPERTIES, "param4", EXPRESSIONS_ALLOWED).set(allowExpressions);
+                node.get(REQUEST_PROPERTIES, "param4", DEFAULT).set(6);
+                node.get(REQUEST_PROPERTIES, "param4", MIN).set(5);
+                node.get(REQUEST_PROPERTIES, "param4", MAX).set(10);
+                node.get(REQUEST_PROPERTIES, "param5", TYPE).set(ModelType.INT);
+                node.get(REQUEST_PROPERTIES, "param5", DESCRIPTION).set("Param5");
+                node.get(REQUEST_PROPERTIES, "param5", EXPRESSIONS_ALLOWED).set(allowExpressions);
+                node.get(REQUEST_PROPERTIES, "param5", ALLOWED).add(3);
+                node.get(REQUEST_PROPERTIES, "param5", ALLOWED).add(5);
+                node.get(REQUEST_PROPERTIES, "param5", ALLOWED).add(7);
                 node.get(REPLY_PROPERTIES, TYPE).set(ModelType.STRING);
                 node.get(REPLY_PROPERTIES, DESCRIPTION).set("Return");
                 return node;

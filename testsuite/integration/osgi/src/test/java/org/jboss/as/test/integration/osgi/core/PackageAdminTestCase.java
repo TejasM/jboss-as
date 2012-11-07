@@ -21,11 +21,10 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -33,7 +32,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
-import org.osgi.service.startlevel.StartLevel;
 
 /**
  * [ARQ-466] Add support for injected PackageAdmin
@@ -46,11 +44,11 @@ import org.osgi.service.startlevel.StartLevel;
 @RunWith(Arquillian.class)
 public class PackageAdminTestCase {
 
-    @Inject
-    public Bundle bundle;
+    @ArquillianResource
+    Bundle bundle;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
     @Deployment
     public static JavaArchive create() {
@@ -61,7 +59,7 @@ public class PackageAdminTestCase {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(StartLevel.class);
+                builder.addImportPackages(PackageAdmin.class);
                 return builder.openStream();
             }
         });

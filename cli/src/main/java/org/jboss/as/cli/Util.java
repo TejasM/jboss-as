@@ -179,7 +179,7 @@ public class Util {
             if(descr.get(Util.ROLLED_BACK).asBoolean()) {
                 buf.append("(The operation was rolled back)");
             } else if(descr.hasDefined(Util.ROLLBACK_FAILURE_DESCRIPTION)){
-                buf.append(descr.get(Util.ROLLBACK_FAILURE_DESCRIPTION).asString());
+                buf.append(descr.get(Util.ROLLBACK_FAILURE_DESCRIPTION).toString());
             } else {
                 buf.append("(The operation also failed to rollback, failure description is not available.)");
             }
@@ -224,17 +224,10 @@ public class Util {
         if(expr == null) {
             throw new IllegalArgumentException("expr is null");
         }
-        final StringBuilder buf = new StringBuilder();
-        for(int i = 0; i < expr.length(); ++i) {
-            final char ch = expr.charAt(i);
-            if(ch == '*') {
-                buf.append('.');
-            } else if(ch == '.') {
-                buf.append('\\');
-            }
-            buf.append(ch);
-        }
-        return buf.toString();
+        String regex = expr.replaceAll("([(){}\\[\\].+^$])", "\\\\$1"); // escape regex characters
+        regex = regex.replaceAll("\\*", ".*"); // replace * with .*
+        regex = regex.replaceAll("\\?", "."); // replace ? with .
+        return regex;
     }
 
     public static boolean listContains(ModelNode operationResult, String item) {

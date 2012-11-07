@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
@@ -44,8 +45,8 @@ import org.jboss.msc.service.ServiceRegistry;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.service.ValueService;
 import org.jboss.msc.value.ImmediateValue;
-import org.jboss.osgi.framework.IntegrationService.BootstrapPhase;
-import org.jboss.osgi.framework.util.ServiceTracker;
+import org.jboss.osgi.framework.spi.IntegrationServices.BootstrapPhase;
+import org.jboss.osgi.framework.spi.ServiceTracker;
 
 /**
  * A service that tracks initial deployments.
@@ -66,6 +67,7 @@ public class InitialDeploymentTracker extends ServiceTracker<Object> {
     private ServiceTarget listenerTarget;
 
     public InitialDeploymentTracker(OperationContext context, ServiceVerificationHandler verificationHandler) {
+        super(InitialDeploymentTracker.class.getSimpleName());
 
         serviceTarget = context.getServiceTarget();
         deploymentNames = getDeploymentNames(context);

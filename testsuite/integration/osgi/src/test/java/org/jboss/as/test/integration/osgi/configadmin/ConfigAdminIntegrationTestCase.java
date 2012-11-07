@@ -29,8 +29,6 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -46,7 +44,7 @@ import org.jboss.as.test.integration.osgi.configadmin.bundle.ConfigAdminBundleAc
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceContainer;
 import org.jboss.msc.service.ServiceController;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -84,11 +82,11 @@ public class ConfigAdminIntegrationTestCase {
     @ArquillianResource
     ManagementClient managementClient;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
-    @Inject
-    public BundleContext syscontext;
+    @ArquillianResource
+    BundleContext syscontext;
 
     @Deployment
     public static JavaArchive deployment() {
@@ -101,8 +99,9 @@ public class ConfigAdminIntegrationTestCase {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addExportPackages(ConfiguredService.class);
-                builder.addImportPackages(ConfigurationAdmin.class, ModelNode.class);
-                builder.addImportPackages(ConfigAdmin.class, ServiceContainer.class);
+                builder.addImportPackages(ConfigurationAdmin.class, ModelNode.class, ModelControllerClient.class);
+                builder.addImportPackages(ConfigAdmin.class, ServiceContainer.class, ManagementClient.class);
+                builder.addImportPackages(PackageAdmin.class);
                 return builder.openStream();
             }
         });

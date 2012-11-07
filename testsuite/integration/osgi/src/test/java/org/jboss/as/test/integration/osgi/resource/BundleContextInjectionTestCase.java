@@ -32,7 +32,7 @@ import org.jboss.as.test.integration.common.HttpRequest;
 import org.jboss.as.test.integration.osgi.resource.bundle.SimpleBeanServlet;
 import org.jboss.as.test.integration.osgi.resource.bundle.SimpleManagedBean;
 import org.jboss.as.test.integration.osgi.resource.bundle.SimpleServlet;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
@@ -73,6 +73,7 @@ public class BundleContextInjectionTestCase {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(jar.getName());
                 builder.addBundleManifestVersion(2);
+                builder.addImportPackages(ManagementClient.class);
                 return builder.openStream();
             }
         });

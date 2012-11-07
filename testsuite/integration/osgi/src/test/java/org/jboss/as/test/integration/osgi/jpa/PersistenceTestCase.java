@@ -24,7 +24,6 @@ package org.jboss.as.test.integration.osgi.jpa;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -36,19 +35,17 @@ import org.jboss.as.test.integration.osgi.jpa.bundle.Employee;
 import org.jboss.as.test.integration.osgi.jpa.bundle.PersistenceActivatorA;
 import org.jboss.as.test.integration.osgi.jpa.bundle.PersistenceActivatorB;
 import org.jboss.as.test.integration.osgi.jpa.bundle.PersistenceService;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.util.tracker.ServiceTracker;
@@ -68,11 +65,11 @@ public class PersistenceTestCase {
     @ArquillianResource
     Deployer deployer;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
     @Deployment
     public static Archive<?> deployment() {
@@ -83,7 +80,8 @@ public class PersistenceTestCase {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
-                builder.addImportPackages(Bundle.class, ServiceTracker.class, EntityManager.class);
+                builder.addImportPackages(PackageAdmin.class, Bundle.class, ServiceTracker.class);
+                builder.addImportPackages(EntityManager.class);
                 return builder.openStream();
             }
         });
@@ -120,36 +118,6 @@ public class PersistenceTestCase {
             Assert.assertEquals("ACTIVE", Bundle.ACTIVE, bundle.getState());
 
             // This service is registered by the {@link PersistenceActivatorB}
-            ServiceReference sref = context.getServiceReference(Callable.class.getName());
-            Callable<Boolean> service = (Callable<Boolean>) context.getService(sref);
-            Assert.assertTrue(service.call());
-
-        } finally {
-            bundle.uninstall();
-        }
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    @Ignore("[AS7-5654] Cannot restart jpa bundle after activation failure")
-    public void testDeferredBundleWithFailure() throws Exception {
-        InputStream input = deployer.getDeployment(PERSISTENCE_BUNDLE_B);
-        Bundle bundle = context.installBundle(PERSISTENCE_BUNDLE_B, input);
-        try {
-            Assert.assertEquals("INSTALLED", Bundle.INSTALLED, bundle.getState());
-
-            try {
-                bundle.start();
-                Assert.fail("BundleException expected");
-            } catch (BundleException e) {
-                // expected
-            }
-            Assert.assertEquals("RESOLVED", Bundle.RESOLVED, bundle.getState());
-
-            bundle.start();
-            Assert.assertEquals("ACTIVE", Bundle.ACTIVE, bundle.getState());
-
-            // This service is registered by the {@link PersistenceActivator}
             ServiceReference sref = context.getServiceReference(Callable.class.getName());
             Callable<Boolean> service = (Callable<Boolean>) context.getService(sref);
             Assert.assertTrue(service.call());

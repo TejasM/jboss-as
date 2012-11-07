@@ -312,6 +312,7 @@ public final class ProcessController {
                             StreamUtils.writeUTFZBytes(os, process.getProcessName());
                             os.write(process.getAuthKey());
                             StreamUtils.writeBoolean(os, process.isRunning());
+                            StreamUtils.writeBoolean(os, process.isStopping());
                         }
                         os.close();
                     } finally {

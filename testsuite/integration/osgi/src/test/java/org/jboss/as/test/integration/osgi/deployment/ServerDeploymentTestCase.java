@@ -23,8 +23,6 @@ import static org.osgi.framework.Constants.BUNDLE_VERSION;
 
 import java.io.InputStream;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -34,8 +32,8 @@ import org.jboss.as.controller.client.helpers.ClientConstants;
 import org.jboss.as.controller.client.helpers.standalone.DeploymentPlanBuilder;
 import org.jboss.as.controller.client.helpers.standalone.ServerDeploymentHelper;
 import org.jboss.as.test.osgi.FrameworkUtils;
-import org.jboss.osgi.spi.ManifestBuilder;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.ManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -64,17 +62,17 @@ public class ServerDeploymentTestCase {
     @ArquillianResource
     public Deployer deployer;
 
-    @Inject
-    public StartLevel startLevel;
+    @ArquillianResource
+    StartLevel startLevel;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
-    @Inject
-    public Bundle bundle;
+    @ArquillianResource
+    Bundle bundle;
 
     @Deployment
     public static JavaArchive createdeployment() {
@@ -87,7 +85,7 @@ public class ServerDeploymentTestCase {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(ClientConstants.class, ModelControllerClient.class, DeploymentPlanBuilder.class);
-                builder.addImportPackages(PackageAdmin.class);
+                builder.addImportPackages(PackageAdmin.class, StartLevel.class);
                 return builder.openStream();
             }
         });
@@ -96,13 +94,12 @@ public class ServerDeploymentTestCase {
 
     @Test
     public void testAutoStart() throws Exception {
+        ServerDeploymentHelper server = new ServerDeploymentHelper(getModelControllerClient());
 
         // Deploy the bundle
         InputStream input = deployer.getDeployment(GOOD_BUNDLE);
-        ServerDeploymentHelper server = new ServerDeploymentHelper(getModelControllerClient());
         String runtimeName = server.deploy("auto-start", input);
 
-        // Find the deployed bundle
         // Find the deployed bundle
         Bundle bundle = packageAdmin.getBundles(GOOD_BUNDLE, null)[0];
         assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundle.getState());
@@ -113,14 +110,41 @@ public class ServerDeploymentTestCase {
 
     @Test
     public void testBadBundleVersion() throws Exception {
-        InputStream input = deployer.getDeployment(BAD_BUNDLE_VERSION);
         ServerDeploymentHelper server = new ServerDeploymentHelper(getModelControllerClient());
+        InputStream input = deployer.getDeployment(BAD_BUNDLE_VERSION);
         try {
             server.deploy(BAD_BUNDLE_VERSION, input);
             fail("Deployment exception expected");
         } catch (Exception ex) {
             // expected
         }
+    }
+
+    @Test
+    public void testRedeployAfterUndeploy() throws Exception {
+        ServerDeploymentHelper server = new ServerDeploymentHelper(getModelControllerClient());
+
+        // Deploy the bundle
+        InputStream input = deployer.getDeployment(GOOD_BUNDLE);
+        String runtimeName = server.deploy("redeploy", input);
+
+        // Find the deployed bundle
+        Bundle bundle = packageAdmin.getBundles(GOOD_BUNDLE, null)[0];
+        assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundle.getState());
+
+        server.undeploy(runtimeName);
+        assertEquals("Bundle UNINSTALLED", Bundle.UNINSTALLED, bundle.getState());
+
+        // Redeploy the same bundle
+        input = deployer.getDeployment(GOOD_BUNDLE);
+        runtimeName = server.deploy("redeploy", input);
+
+        // Find the deployed bundle
+        bundle = packageAdmin.getBundles(GOOD_BUNDLE, null)[0];
+        assertEquals("Bundle ACTIVE", Bundle.ACTIVE, bundle.getState());
+
+        server.undeploy(runtimeName);
+        assertEquals("Bundle UNINSTALLED", Bundle.UNINSTALLED, bundle.getState());
     }
 
     private ModelControllerClient getModelControllerClient() {

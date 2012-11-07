@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.inject.Inject;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.namespace.QName;
@@ -40,20 +39,18 @@ import org.jboss.as.arquillian.container.ManagementClient;
 import org.jboss.as.test.integration.osgi.deployment.bundle.DeferredFailActivator;
 import org.jboss.as.test.integration.osgi.jaxws.bundle.Endpoint;
 import org.jboss.as.test.integration.osgi.jaxws.bundle.EndpointImpl;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
@@ -77,11 +74,11 @@ public class WebServiceEndpointTestCase {
     @ArquillianResource
     ManagementClient managementClient;
 
-    @Inject
-    public PackageAdmin packageAdmin;
+    @ArquillianResource
+    PackageAdmin packageAdmin;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
     @Deployment
     public static Archive<?> testDeployment() {
@@ -94,6 +91,7 @@ public class WebServiceEndpointTestCase {
                 builder.addBundleSymbolicName(archive.getName());
                 builder.addBundleManifestVersion(2);
                 builder.addImportPackages(WebService.class, SOAPBinding.class, QName.class, Service.class);
+                builder.addImportPackages(PackageAdmin.class, ManagementClient.class);
                 return builder.openStream();
             }
         });
@@ -173,52 +171,6 @@ public class WebServiceEndpointTestCase {
 
             QName serviceName = new QName("http://osgi.smoke.test.as.jboss.org", "EndpointService");
             Service service = Service.create(getWsdl("/bundle-c"), serviceName);
-            Endpoint port = service.getPort(Endpoint.class);
-            Assert.assertEquals("Foo", port.echo("Foo"));
-        } finally {
-            bundle.uninstall();
-        }
-    }
-
-    @Test
-    @Ignore("[AS7-5653] Cannot restart webapp bundle after activation failure")
-    public void testDeferredBundleWithFailure() throws Exception {
-        InputStream input = deployer.getDeployment(BUNDLE_D_WAB);
-        Bundle bundle = context.installBundle(BUNDLE_D_WAB, input);
-        try {
-            Assert.assertEquals("INSTALLED", Bundle.INSTALLED, bundle.getState());
-            try {
-                QName serviceName = new QName("http://osgi.smoke.test.as.jboss.org", "EndpointService");
-                Service service = Service.create(getWsdl("/bundle-d"), serviceName);
-                Endpoint port = service.getPort(Endpoint.class);
-                port.echo("Foo");
-                Assert.fail("WebServiceException expected");
-            } catch (WebServiceException ex) {
-                // expected
-            }
-
-            try {
-                bundle.start();
-                Assert.fail("BundleException expected");
-            } catch (BundleException ex) {
-                // expected
-            }
-            Assert.assertEquals("RESOLVED", Bundle.RESOLVED, bundle.getState());
-            try {
-                QName serviceName = new QName("http://osgi.smoke.test.as.jboss.org", "EndpointService");
-                Service service = Service.create(getWsdl("/bundle-d"), serviceName);
-                Endpoint port = service.getPort(Endpoint.class);
-                port.echo("Foo");
-                Assert.fail("WebServiceException expected");
-            } catch (WebServiceException ex) {
-                // expected
-            }
-
-            bundle.start();
-            Assert.assertEquals("ACTIVE", Bundle.ACTIVE, bundle.getState());
-
-            QName serviceName = new QName("http://osgi.smoke.test.as.jboss.org", "EndpointService");
-            Service service = Service.create(getWsdl("/bundle-d"), serviceName);
             Endpoint port = service.getPort(Endpoint.class);
             Assert.assertEquals("Foo", port.echo("Foo"));
         } finally {

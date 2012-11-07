@@ -210,7 +210,7 @@ public abstract class AttributeDefinition {
      * @throws OperationFailedException if the value is not valid
      */
     public final void validateAndSet(ModelNode operationObject, final ModelNode model) throws OperationFailedException {
-        if (isDeprecated()){
+        if (operationObject.hasDefined(name) && isDeprecated()) {
             ControllerLogger.DEPRECATED_LOGGER.attributeDeprecated(getName());
         }
         final ModelNode newValue = correctValue(operationObject.get(name), model.get(name));
@@ -484,6 +484,17 @@ public abstract class AttributeDefinition {
                 }
             }
         }
+        addAllowedValuesToDescription(result, validator);
+        return result;
+    }
+
+    /**
+     * Adds the allowed values. Override for attributes who should not use the allowed values.
+     *
+     * @param result the node to add the allowed values to
+     * @param validator the validator to get the allowed values from
+     */
+    protected void addAllowedValuesToDescription(ModelNode result, ParameterValidator validator) {
         if (validator instanceof AllowedValuesValidator) {
             AllowedValuesValidator avv = (AllowedValuesValidator) validator;
             List<ModelNode> allowed = avv.getAllowedValues();
@@ -493,7 +504,6 @@ public abstract class AttributeDefinition {
                 }
             }
         }
-        return result;
     }
 
     /**

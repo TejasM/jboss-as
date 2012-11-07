@@ -23,14 +23,12 @@ import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 
-import javax.inject.Inject;
-
 import org.jboss.arquillian.container.test.api.Deployer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.as.test.osgi.FrameworkUtils;
-import org.jboss.osgi.spi.OSGiManifestBuilder;
+import org.jboss.osgi.metadata.OSGiManifestBuilder;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.Asset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
@@ -57,11 +55,11 @@ public class StartLevelTestCase {
     @ArquillianResource
     public Deployer deployer;
 
-    @Inject
-    public BundleContext context;
+    @ArquillianResource
+    BundleContext context;
 
-    @Inject
-    public StartLevel startLevel;
+    @ArquillianResource
+    StartLevel startLevel;
 
     @Deployment
     public static JavaArchive deployment() {

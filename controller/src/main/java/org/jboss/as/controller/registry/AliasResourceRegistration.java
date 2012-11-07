@@ -182,7 +182,7 @@ final class AliasResourceRegistration extends AbstractResourceRegistration imple
 
     @Override
     public void unregisterAttribute(String attributeName) {
-        alreadyRegistered();
+       throw alreadyRegistered();
     }
 
     @Override
